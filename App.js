@@ -1,5 +1,10 @@
 import { createAppContainer, createSwitchNavigator } from "react-navigation";
 import {createStackNavigator} from "react-navigation-stack";
+import React from 'react';
+import {Provider} from 'react-redux';
+import {Root} from 'native-base';
+
+import store from './src/Publics/Store';
 import Login from './src/Screens/Auth/Login';
 import Register from './src/Screens/Auth/Register';
 import Home from './src/Screens/App/Home';
@@ -28,4 +33,14 @@ const AppNavigator = createSwitchNavigator({
   initialRouteName:'Auth',
 });
 
-export default createAppContainer(AppNavigator);
+const AppContainer = createAppContainer(AppNavigator)
+const App = ()=>{
+  return(
+    <Provider store={store}>
+      <Root>
+        <AppContainer/>
+      </Root>
+    </Provider>
+  )
+}
+export default App;

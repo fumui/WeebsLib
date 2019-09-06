@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import { Image, StyleSheet } from 'react-native';
+import { Image, StyleSheet, ActivityIndicator } from 'react-native';
+import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
+import {connect} from 'react-redux';
 import { 
   Container, 
   Header, 
@@ -9,20 +11,23 @@ import {
   Text, 
   Card, 
   CardItem,
-  Grid, 
-  Col,
-  Row, 
-  Button, 
-  Content, 
-  Left, 
-  Footer, 
-  FooterTab, 
-  Icon } from 'native-base';
+  Button} from 'native-base';
 
 import GenreSwiper from '../../Components/GenreSwiper';
 import AppFooter from '../../Components/AppFooter';
+import {getAllBooks} from '../../Publics/Actions/Books';
 
-export default class Home extends Component {
+class Home extends Component {
+
+  constructor(props){
+    super(props)
+  }
+
+  componentDidMount = () => {
+    if (this.props.books.books.length === 0)
+      this.props.dispatch(getAllBooks(1))
+  }
+
   render() {
     return (
       <Container>
@@ -31,78 +36,55 @@ export default class Home extends Component {
             <Title style={styles.title} >Weebs Lib</Title>
           </Body>
         </Header>
-        <Content contentContainerStyle={styles.root} showsVerticalScrollIndicator={false}>
           <View>
-            <GenreSwiper/>
+            <GenreSwiper {...this.props}/>
           </View>
-          <Container style={{marginTop:150,}}>
-            <Text>Popular Books</Text>
-            <Container style={styles.booksList}>
-              <Grid>
-                <Row style={styles.booksListRow}>
-                  <Col>
-                  <Card style={styles.bookCard} >
-                    <CardItem cardBody button onPress={()=>{this.props.navigation.navigate('BookDetailScreen')}} >
-                      <Image source={require('../../img/Tanya.jpg')} style={styles.bookImage}/>
-                    </CardItem>
-                    <CardItem footer>
-                      <Left>
-                        <Button transparent >
-                          <Text>The Saga Of Tanya The Evil Vol.1 (Manga)</Text>
-                        </Button>
-                      </Left>
-                    </CardItem>
-                  </Card>
-                </Col>
-                <Col>
-                  <Card style={styles.bookCard} >
-                    <CardItem cardBody button onPress={()=>{this.props.navigation.navigate('BookDetailScreen')}} >
-                      <Image source={require('../../img/Tanya.jpg')} style={styles.bookImage}/>
-                    </CardItem>
-                    <CardItem footer>
-                      <Left>
-                        <Button transparent >
-                          <Text>The Saga Of Tanya The Evil Vol.1 (Manga)</Text>
-                        </Button>
-                      </Left>
-                    </CardItem>
-                  </Card>
-                </Col>
-                </Row>
-                <Row style={styles.booksListRow}>
-                  <Col>
-                  <Card style={styles.bookCard} >
-                    <CardItem cardBody button onPress={()=>{this.props.navigation.navigate('BookDetailScreen')}} >
-                      <Image source={require('../../img/Tanya.jpg')} style={styles.bookImage}/>
-                    </CardItem>
-                    <CardItem footer>
-                      <Left>
-                        <Button transparent >
-                          <Text>The Saga Of Tanya The Evil Vol.1 (Manga)</Text>
-                        </Button>
-                      </Left>
-                    </CardItem>
-                  </Card>
-                </Col>
-                <Col>
-                  <Card style={styles.bookCard} >
-                    <CardItem cardBody button onPress={()=>{this.props.navigation.navigate('BookDetailScreen')}} >
-                      <Image source={require('../../img/Tanya.jpg')} style={styles.bookImage}/>
-                    </CardItem>
-                    <CardItem footer>
-                      <Left>
-                        <Button transparent >
-                          <Text>The Saga Of Tanya The Evil Vol.1 (Manga)</Text>
-                        </Button>
-                      </Left>
-                    </CardItem>
-                  </Card>
-                </Col>
-                </Row>
-              </Grid>
-            </Container>
+          <Container style={{marginTop:150,alignSelf:'center'}}>
+            <Text>Books</Text>
+                <FlatList
+                  data={this.props.books.books}
+                  numColumns={2}
+                  horizontal = {false}
+                  keyExtractor={item => item.id}
+                  removeClippedSubviews={false}
+                  contentContainerStyle={{justifyContent:'space-between'}}
+                  ListFooterComponent={() => {
+                    if (!this.props.books.isLoading) return null;
+                    return (
+                      <ActivityIndicator
+                        style={{ color: '#000' }}
+                      />
+                    );
+                   }}
+                  onEndReached={async ()=>{
+                    console.log('reached')
+                    if(!(this.props.books.isLoading || this.props.books.isRejected)){
+                    console.log('fetching')
+                    let nextPage = Number(this.props.books.page) + 1
+                      await this.props.dispatch(getAllBooks(nextPage))
+                    }
+                  }}
+                  renderItem={({item})=>{
+                    return(
+                      <Card style={{height:'100%'}}  >
+                        <CardItem cardBody button  onPress={()=>{this.props.navigation.navigate('BookDetailScreen',{bookId:item.id})}} >
+                          <Image source={{uri:item.image}} style={{
+                            height:260,
+                            width:160,
+                            }}/>
+                        </CardItem>
+                        <CardItem>
+                          <Body>
+                          <Button transparent onPress={()=>{this.props.navigation.navigate('BookDetailScreen',{bookId:item.id})}}>
+                            <Text style={styles.bookTitle}>{item.title.length > 20 ? item.title.substr(0,20)+'...':item.title}</Text>
+                          </Button>
+                          </Body>
+                        </CardItem>
+                      </Card>
+                    )
+                  }}
+                />
           </Container>
-        </Content>
         <AppFooter {...this.props}/>
       </Container>
     );
@@ -118,7 +100,7 @@ const styles = StyleSheet.create({
   },
   booksList:{
     display:"flex",
-    flexDirection:'row',
+    flexDirection:'column',
     flexWrap:'wrap',
     justifyContent:'space-between',
   },
@@ -128,7 +110,6 @@ const styles = StyleSheet.create({
   },
   bookCard:{
     width: '100%', 
-    height:'100%', 
     flex: 1, 
     elevation:10,
   },
@@ -137,4 +118,14 @@ const styles = StyleSheet.create({
     maxHeight:'100%', 
     flex: 1,
   },
+  bookTitle:{
+    fontSize:12,
+    color:"black"
+  }
 })
+const mapStateToProps = state =>{
+  return{
+    books: state.books
+  } 
+}
+export default connect(mapStateToProps)(Home)

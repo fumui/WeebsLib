@@ -1,22 +1,81 @@
 import React, { Component } from 'react';
 import {Text, StyleSheet} from 'react-native';
-import { Form, Item, Input, Label, Content, Button } from 'native-base';
-export default class Auth extends Component {
+import {connect} from 'react-redux';
+import { Form, Item, Input, Label, Content, Button, Toast } from 'native-base';
+import AsyncStorage from '@react-native-community/async-storage'
+import {login} from '../../Publics/Actions/Users'
+class Auth extends Component {
+  constructor(props){
+    super(props)
+    this.state = {
+      formData:{
+        email:'',
+        password:'',
+      },
+      showToast:false
+    }
+  }
+
+  componentDidMount = async () =>{
+    await AsyncStorage.getItem(
+      'token', 
+      (err, res)=>{
+        console.log(err,res);
+        if(res)
+          this.props.navigation.navigate('Home')
+      }
+    )
+  }
+  
+  handleChange= (name,value) => {
+    let newFormData = {...this.state.formData}
+    newFormData[name] = value
+    this.setState({
+      formData: newFormData
+    })
+    console.log(newFormData)
+  }
+
+  handleSubmit = () => {
+    this.props.dispatch(login(this.state.formData))
+    .then(async () => {
+      if(this.props.users.token !== undefined) {
+        await AsyncStorage.setItem(
+          'token', 
+          this.props.users.token,
+          err => console.log(err)
+        )
+        this.props.navigation.navigate('Home')
+      }
+    })
+    .catch(()=>{
+      console.log(this.props.users.errMessage)
+      Toast.show({
+        text: this.props.users.errMessage,
+        buttonText: "Okay",
+        type: "danger",
+        position:'top',
+        duration:4000,
+        style:styles.toast
+      })
+    })
+  }
+
   render() {
     return (
       <Content style={styles.root}>
         <Text style={styles.welcomeText}>Here To Get Welcomed !</Text>
-        <Form style={styles.form}>
-          <Item stackedLabel>
+        <Form style={styles.form} >
+          <Item floatingLabel>
             <Label>Email</Label>
-            <Input textContentType="emailAddress"/>
+            <Input onChangeText={(text)=>this.handleChange('email',text)}  autoCompleteType='email'  keyboardType='email-address' textContentType="emailAddress"/>
           </Item>
-          <Item stackedLabel>
+          <Item floatingLabel>
             <Label>Password</Label>
-            <Input textContentType="password"/>
+            <Input onChangeText={(text)=>this.handleChange('password',text)} secureTextEntry={true} textContentType="password"/>
           </Item>
           <Button style={styles.buttons}
-          onPress={()=>this.props.navigation.navigate('Home')}
+          onPress={this.handleSubmit}
           block dark><Text style={styles.formButtonsText}>Sign In</Text></Button>
         </Form>
         <Button 
@@ -63,4 +122,13 @@ const styles = StyleSheet.create({
     fontSize:17,
     fontWeight:'bold',
   },
+  toast:{
+    marginTop:20,
+  },
 })
+const mapStateToProps = state =>{
+  return {
+    users : state.users
+  }
+}
+export default connect(mapStateToProps)(Auth)

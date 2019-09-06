@@ -1,6 +1,8 @@
 import React from 'react';
-import { Image, StyleSheet } from 'react-native';
-import { DeckSwiper, Card, CardItem,Text} from 'native-base';
+import { Image, StyleSheet, TouchableNativeFeedback } from 'react-native';
+import {connect} from 'react-redux';
+import { DeckSwiper, Card, CardItem,Text, View} from 'native-base';
+import {getBooksByGenre} from '../Publics/Actions/Books';
 const cards = [
   {
     text: 'Action',
@@ -39,7 +41,7 @@ const styles = StyleSheet.create({
     backgroundColor:"#28BFDB" 
   },
   genreImage:{ 
-    maxHeight: 120, 
+    height: 120, 
     maxWidth: 120 , 
     flex: 1 ,
   },
@@ -50,20 +52,22 @@ const styles = StyleSheet.create({
     flex: 1 ,
   },
 })
-const GenreSwiper = () => {
+const GenreSwiper = (props) => {
   return(
     <DeckSwiper
       dataSource={cards}
       renderItem={item =>
+        <TouchableNativeFeedback onPress={()=>{props.dispatch(getBooksByGenre(item.text))}}>
         <Card style={styles.genreCard}>
-          <CardItem cardBody
+          <CardItem cardBody 
             style={styles.genreCardItem}>
             <Text style={styles.genreText}>{item.text}</Text>
-            <Image style={styles.genreImage} source={item.image} />
+            <Image style={styles.genreImage} source={item.image}/>
           </CardItem>
         </Card>
+        </TouchableNativeFeedback>
       }
     />
   )
 }
-export default GenreSwiper
+export default connect(null)(GenreSwiper)
