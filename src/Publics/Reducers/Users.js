@@ -50,6 +50,27 @@ const users = (state = initState, action)=>{
         isLoading:false,
         isFulfilled:true,
       }
+    case 'GET_PROFILE_PENDING':
+      return{
+        ...state,
+        isLoading:true,
+        isRejected:false,
+        isFulfilled:false,
+      }
+    case 'GET_PROFILE_REJECTED':
+      return{
+        ...state,
+        isLoading:false,
+        isRejected:true,
+        errMessage:action.payload.response ? action.payload.response.data.message : action.payload.message,
+      }
+    case 'GET_PROFILE_FULFILLED':
+      return{
+        ...state,
+        isLoading:false,
+        isFulfilled:true,
+        userProfile:action.payload.data.data
+      }
     default:
       return state
   }

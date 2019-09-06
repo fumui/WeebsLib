@@ -29,6 +29,14 @@ class Auth extends Component {
   handleSubmit = () => {
     this.props.dispatch(register(this.state.formData))
     .then(() => {
+      Toast.show({
+        text: 'You can now login',
+        buttonText: "Okay",
+        type: "success",
+        position:'top',
+        duration:4000,
+        style:styles.toast
+      })
       this.props.navigation.navigate('Login')
     })
     .catch(()=>{
@@ -68,10 +76,11 @@ class Auth extends Component {
           <Button 
             style={styles.formButton} 
             onPress={this.handleSubmit}
+            disabled={this.props.users.isLoading}
             full 
             dark
           >
-            <Text style={styles.formButtonsText}>Sign Up</Text>
+            <Text style={styles.formButtonsText}>{this.props.users.isLoading ? 'Loading':'Sign Up'}</Text>
           </Button>
         </Form>
         <Button 
@@ -123,7 +132,7 @@ const styles = StyleSheet.create({
     fontWeight:'bold',
   },
   toast:{
-    marginTop:20,
+    marginTop:10,
   },
 })
 const mapStateToProps = state =>{

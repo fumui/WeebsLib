@@ -14,3 +14,14 @@ export const register = (data) => {
     payload: Axios.post(`${HOST}/users/register`,data)
   }
 }
+export const getProfile = (token) => {
+  return {
+    type:'GET_PROFILE',
+    payload: Axios.get(`${HOST}/users/profile`,{
+        headers:{
+          Authorization : token
+        }
+      }
+    )
+  }
+}

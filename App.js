@@ -10,6 +10,7 @@ import Register from './src/Screens/Auth/Register';
 import Home from './src/Screens/App/Home';
 import BookDetail from './src/Screens/App/BookDetail';
 import History from './src/Screens/App/History';
+import UserProfile from './src/Screens/App/Profile';
 
 const AuthStack = createStackNavigator({
   Login:Login,
@@ -22,6 +23,7 @@ const AppStack = createStackNavigator({
   Home:Home,
   BookDetailScreen:BookDetail,
   History:History,
+  Profile:UserProfile
 },{
   headerMode:"none",
 })

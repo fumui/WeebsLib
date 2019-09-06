@@ -1,30 +1,64 @@
-import React, { Component } from 'react';
-import { Image, Text, StyleSheet } from 'react-native';
+import React, { Component, Fragment} from 'react';
+import AsyncStorage from '@react-native-community/async-storage'
+import { FlatList } from 'react-native-gesture-handler';
+import {connect} from 'react-redux';
+import { Image, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { 
   Container, 
   Content,
   Header,
   Body, 
+  Title,
+  Left,
+  Right,
+  Spinner
 } from 'native-base';
+import {getBorrowingHistory} from '../../Publics/Actions/Books';
 import AppFooter from '../../Components/AppFooter';
-
-export default class History extends Component {
+import notFound from '../../img/notFound.png';
+import BookCard from '../../Components/BookCard';
+class History extends Component {
+  componentDidMount=()=>{
+    AsyncStorage.getItem('token',(err, res)=>{
+      if(res)
+        this.props.dispatch(getBorrowingHistory(res))
+    })
+  }
   render() {
     return (
       <Container>
         <Header>
+          <Left/>
           <Body>
-            <Text>History</Text>
+            <Title>History</Title>
           </Body>
+          <Right />
         </Header>
-        <Content padder contentContainerStyle={styles.root} showsVerticalScrollIndicator={false}>
-          <Container style={styles.coverContainer}>
-            <Image source={require('../../img/Tanya.jpg')}  style={styles.coverImage} />
-            <Image source={require('../../img/Tanya.jpg')} style={styles.miniCoverImage} />
-            <Text style={styles.bookDescription}>
-              Finally, the Osfjord clash between Major Tanya Degurechaff and Colonel Anson Sue reaches its climax! Who will emerge victorious?! As the former salaryman prepares to launch her decisive attack, an old enemy makes a shocking appearance on the battlefield...And that enemy is none other than...Being X?!
-            </Text>
-          </Container>
+        <Content contentContainerStyle={styles.root} showsVerticalScrollIndicator={false}>
+        {
+          this.props.books.isLoading ?
+          <Spinner/>
+          :
+          this.props.books.borrowingHistory.length !== 0 ?
+          <FlatList
+            data={this.props.books.borrowingHistory}
+            numColumns={2}
+            horizontal = {false}
+            keyExtractor={item => item.id}
+            removeClippedSubviews={false}
+            contentContainerStyle={{justifyContent:'space-between'}}
+            renderItem={({item})=>{
+              console.log(item)
+              return(
+                <BookCard bookData={item} bookId={item.book_id} navigation={this.props.navigation} />
+              )
+            }}
+          />:
+          <Fragment>
+          <Image source={notFound} style={styles.imageNotFound}/>
+          <Text style={styles.title}>History Not Found</Text>
+          </Fragment>
+        }
         </Content>
         <AppFooter {...this.props} />
       </Container>
@@ -33,34 +67,22 @@ export default class History extends Component {
 }
 const styles = StyleSheet.create({
   title:{
-    marginLeft:30,
+    alignSelf:'center',
     color:"black",
+    fontSize:18
   },
   root:{
+    justifyContent:'space-between',
+    alignContent:'center',
   },
-  coverContainer:{
-    position:"relative"
-  },
-  coverImage:{
-    marginLeft:-10,
-    maxWidth:'110%',
-    maxHeight:'45%',
-  },
-  miniCoverImage:{
-    // position:"absolute",
-    alignSelf:'flex-end',
-    marginRight:'5%',
-    marginTop:'-55%',
-    maxWidth:'40%',
-    maxHeight:'40%',
-    resizeMode:"contain"
-    // top:'-50%',
-    // right:'-50%',
-    // top:'20%',
-    // transform:[{scale:0.8}]
-  },
-  bookDescription:{
-    padding:20,
-    fontSize:15,
+  imageNotFound:{
+    alignSelf:'center',
+    marginTop:150
   }
 })
+const mapStateToProps = state =>{
+  return{
+    books: state.books
+  } 
+}
+export default connect(mapStateToProps)(History)

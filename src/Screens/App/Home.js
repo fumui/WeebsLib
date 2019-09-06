@@ -9,6 +9,7 @@ import {
   Body, 
   Title, 
   Text, 
+  Spinner,
   Card, 
   CardItem,
   Button} from 'native-base';
@@ -16,11 +17,15 @@ import {
 import GenreSwiper from '../../Components/GenreSwiper';
 import AppFooter from '../../Components/AppFooter';
 import {getAllBooks} from '../../Publics/Actions/Books';
+import BookCard from '../../Components/BookCard';
 
 class Home extends Component {
 
   constructor(props){
     super(props)
+    this.state={
+      refreshing:false,
+    }
   }
 
   componentDidMount = () => {
@@ -48,39 +53,31 @@ class Home extends Component {
                   keyExtractor={item => item.id}
                   removeClippedSubviews={false}
                   contentContainerStyle={{justifyContent:'space-between'}}
+                  refreshing = {this.state.refreshing}
+                  onRefresh={()=>{
+                    this.setState({refreshing:true},()=>{
+                      this.props.dispatch(getAllBooks(1))
+                        .then(()=>{
+                          this.setState({refreshing:false})
+                        })
+                    })
+                  }}
                   ListFooterComponent={() => {
                     if (!this.props.books.isLoading) return null;
                     return (
-                      <ActivityIndicator
-                        style={{ color: '#000' }}
-                      />
+                      <Spinner style={{marginBottom:50}} />
                     );
                    }}
+                   onEndReachedThreshold={0.1}
                   onEndReached={async ()=>{
-                    console.log('reached')
                     if(!(this.props.books.isLoading || this.props.books.isRejected)){
-                    console.log('fetching')
                     let nextPage = Number(this.props.books.page) + 1
                       await this.props.dispatch(getAllBooks(nextPage))
                     }
                   }}
                   renderItem={({item})=>{
                     return(
-                      <Card style={{height:'100%'}}  >
-                        <CardItem cardBody button  onPress={()=>{this.props.navigation.navigate('BookDetailScreen',{bookId:item.id})}} >
-                          <Image source={{uri:item.image}} style={{
-                            height:260,
-                            width:160,
-                            }}/>
-                        </CardItem>
-                        <CardItem>
-                          <Body>
-                          <Button transparent onPress={()=>{this.props.navigation.navigate('BookDetailScreen',{bookId:item.id})}}>
-                            <Text style={styles.bookTitle}>{item.title.length > 20 ? item.title.substr(0,20)+'...':item.title}</Text>
-                          </Button>
-                          </Body>
-                        </CardItem>
-                      </Card>
+                      <BookCard bookData={item} navigation={this.props.navigation} />
                     )
                   }}
                 />

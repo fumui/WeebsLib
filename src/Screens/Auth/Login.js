@@ -45,6 +45,15 @@ class Auth extends Component {
           this.props.users.token,
           err => console.log(err)
         )
+        Toast.show({
+          text: 'Welcome',
+          buttonText: "Okay",
+          type: "success",
+          position:'top',
+          duration:4000,
+          style:styles.toast
+        })
+        
         this.props.navigation.navigate('Home')
       }
     })
@@ -74,9 +83,11 @@ class Auth extends Component {
             <Label>Password</Label>
             <Input onChangeText={(text)=>this.handleChange('password',text)} secureTextEntry={true} textContentType="password"/>
           </Item>
-          <Button style={styles.buttons}
-          onPress={this.handleSubmit}
-          block dark><Text style={styles.formButtonsText}>Sign In</Text></Button>
+          <Button 
+            disabled={this.props.users.isLoading}
+            style={styles.buttons}
+            onPress={this.handleSubmit}
+            block dark><Text style={styles.formButtonsText}>{this.props.users.isLoading ? 'Loading':'Sign In'}</Text></Button>
         </Form>
         <Button 
           style={styles.buttons} 

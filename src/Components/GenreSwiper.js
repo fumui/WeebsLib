@@ -6,28 +6,18 @@ import {getBooksByGenre} from '../Publics/Actions/Books';
 const cards = [
   {
     text: 'Action',
-    name: 'One',
+    key: '1',
     image: require('../img/Action.png'),
   },
   {
-    text: 'Drama',
-    name: '2',
-    image: require('../img/Drama.png'),
-  },
-  {
-    text: 'Fantasy',
-    name: '3',
-    image: require('../img/Fantasy.png'),
-  },
-  {
-    text: 'Romance',
-    name: '4',
-    image: require('../img/Romance.png'),
+    text: 'Adventure',
+    key: '2',
+    image: require('../img/Adventure.png'),
   },
   {
     text: 'Slice Of Life',
-    name: '4',
-    image: require('../img/SliceOfLife.png'),
+    key: '3',
+    image: require('../img/SliceofLife.png'),
   },
 ];
 const styles = StyleSheet.create({
