@@ -38,14 +38,19 @@ class BookDetail extends Component {
                 <Text style={{fontSize:20 , paddingLeft: 15, paddingTop:15, elevation:3, }}>{bookData.genre}</Text>
                 <Image source={{uri:bookData.image}} style={styles.miniCoverImage} />
                 <Text style={styles.bookDescription}>{bookData.description}</Text>
-                <Button block warning
-                  disabled={!available} 
-                  onPress={()=>{this.borrowBook(bookId)}}
-                >
-                  {
-                    available ? <Text>Request</Text>:<Text>Unavailable</Text>
-                  }
-                </Button>
+                {
+                  this.props.books.isLoading ? 
+                    <Button block warning><Text>Loading</Text></Button>
+                    :
+                    <Button block warning
+                    disabled={!available} 
+                    onPress={()=>{this.borrowBook(bookId)}}
+                    >
+                      {
+                        available ? <Text>Request</Text>:<Text>Unavailable</Text>
+                      }
+                    </Button>
+                }
               </Container>
             </Content>
             <AppFooter {...this.props} />
